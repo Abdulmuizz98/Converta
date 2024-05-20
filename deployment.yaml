@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: converta-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: converta
+  template:
+    metadata:
+      labels:
+        app: converta
+    spec:
+      containers:
+        - name: postgresdb
+          image: postgres:16.2
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+        - name: converta-api
+          image: your_converta_api_image:tag
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ConnectionStrings__PgSqlConnection
+              valueFrom:
+                secretKeyRef:
+                  name: converta-api-secret
+                  key: ConnectionStrings__PgSqlConnection
+            - name: ASPNETCORE_HTTP_PORTS
+              valueFrom:
+                secretKeyRef:
+                  name: converta-api-secret
+                  key: ASPNETCORE_HTTP_PORTS
+
+        - name: api-gateway
+          image: your_api_gateway_image:tag
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: api-gateway-secret
+                  key: API_ENDPOINT
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: api-gateway-secret
+                  key: PORT
+      volumes:
+        - name: postgres-data
+          emptyDir: {}
