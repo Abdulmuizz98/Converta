@@ -1,0 +1,10 @@
+# directories
+**/bin/
+**/obj/
+**/out/
+**/dist/
+
+
+# files
+acc
+**/*.md
