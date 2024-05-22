@@ -1,5 +1,6 @@
-import express, { Express, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
+dotenv.config();
+import express, { Express, Request, Response, NextFunction } from "express";
 import axios, { AxiosError } from "axios";
 import { firebase as admin } from "./lib/firebase";
 import { verifyApiKey } from "./utils";
@@ -7,7 +8,7 @@ import authRoutes from "./auth";
 import cors from "cors";
 import bodyParser from "body-parser";
 
-dotenv.config();
+console.log("PORT: ", process.env.PORT);
 
 const app: Express = express();
 app.use(cors());
