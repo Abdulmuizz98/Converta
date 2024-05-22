@@ -13,9 +13,8 @@ CMD [ "yarn", "run", "dev" ]
 
 FROM base AS production 
 COPY . .
-RUN yarn prune --production
 EXPOSE 8000
 EXPOSE 3000
-CMD [ "yarn", "run", "start" ]
+CMD ["yarn", "run", "build", "&&", "yarn", "run", "start"]
 
 
