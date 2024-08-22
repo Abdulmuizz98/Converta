@@ -4,19 +4,25 @@ import { ERROR, notify } from "./notificationSlice";
 import { getConfig } from "./authSlice";
 import { logout } from "./authSlice";
 
+type ServiceId = "converta" | "anova";
+
+interface ApiKeyResponse {
+  service_id: ServiceId;
+  apikey: string;
+}
 const SERVICE_URI = import.meta.env.VITE_SERVICE_URI;
 
 // Define an async thunk action creator
-export const getPixels = createAsyncThunk(
-  "pixels/getPixels",
-  async (_, { dispatch, getState }) => {
+export const getApiKey = createAsyncThunk(
+  "apiKeys/getApiKey",
+  async (serviceId: ServiceId, { dispatch, getState }) => {
     try {
       const user = getState().auth.user;
       const response = await axios.get(
-        `${SERVICE_URI}/api/pixel/mine`,
+        `${SERVICE_URI}/api/apikey/${serviceId}`,
         getConfig(user.token)
       );
-      return { pixels: response.data };
+      return response.data as ApiKeyResponse;
     } catch (err: any) {
       if (err.response.status === 403) {
         dispatch(logout());
@@ -32,33 +38,21 @@ export const getPixels = createAsyncThunk(
   }
 );
 
-interface PixelInput {
-  pixelId: string;
-  pixelName: string;
-  pixelType: string;
-  pixelDescription: string;
-  accessToken: string;
-}
-export const addPixel = createAsyncThunk(
-  "pixels/addPixel",
-  async (pixel: PixelInput, { dispatch, getState }) => {
-    const user = getState().auth.user;
-
-    const payload: Pixel = {
-      id: pixel.pixelId,
-      name: pixel.pixelName,
-      pixel_type: pixel.pixelType,
-      description: pixel.pixelDescription,
-      access_token: pixel.accessToken,
-    };
-
+// Define an async thunk action creator
+export const createNewApiKey = createAsyncThunk(
+  "apiKeys/createNewApiKey",
+  async (serviceId: ServiceId, { dispatch, getState }) => {
     try {
+      const user = getState().auth.user;
+      const payload: { service_id: ServiceId } = {
+        service_id: serviceId,
+      };
       const response = await axios.post(
-        `${SERVICE_URI}/api/pixel`,
+        `${SERVICE_URI}/api/apikey`,
         payload,
         getConfig(user.token)
       );
-      return response.data;
+      return response.data as ApiKeyResponse;
     } catch (err: any) {
       if (err.response.status === 403) {
         dispatch(logout());
@@ -74,50 +68,46 @@ export const addPixel = createAsyncThunk(
   }
 );
 
-interface Pixel {
-  id: string;
-  name: string;
-  pixel_type: string;
-  description: string;
-  access_token: string;
-}
+type ApiKeys = {
+  [key in ServiceId]?: string;
+};
 
-interface PixelStateInterface {
-  pixels: Pixel[];
+interface ApiKeysInterface {
+  keys: ApiKeys;
   loading: boolean;
   error: string | undefined;
 }
 
-const initialState: PixelStateInterface = {
-  pixels: [],
+const initialState: ApiKeysInterface = {
+  keys: {},
   loading: false,
   error: "",
 };
-const pixelsSlice = createSlice({
-  name: "pixels",
+const apiKeysSlice = createSlice({
+  name: "apiKeys",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getPixels.pending, (state) => {
+      .addCase(getApiKey.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getPixels.fulfilled, (state, action) => {
+      .addCase(getApiKey.fulfilled, (state, action) => {
         state.loading = false;
-        state.pixels = action.payload.pixels;
+        state.keys[action.payload.service_id] = action.payload.apikey;
       })
-      .addCase(getPixels.rejected, (state, action) => {
+      .addCase(getApiKey.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(addPixel.pending, (state) => {
+      .addCase(createNewApiKey.pending, (state) => {
         state.loading = true;
       })
-      .addCase(addPixel.fulfilled, (state, action) => {
+      .addCase(createNewApiKey.fulfilled, (state, action) => {
         state.loading = false;
-        state.pixels.push(action.payload);
+        state.keys[action.payload.service_id] = action.payload.apikey;
       })
-      .addCase(addPixel.rejected, (state, action) => {
+      .addCase(createNewApiKey.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });
@@ -125,4 +115,4 @@ const pixelsSlice = createSlice({
 });
 
 // export const {} = leadsSlice.actions;
-export default pixelsSlice;
+export default apiKeysSlice;

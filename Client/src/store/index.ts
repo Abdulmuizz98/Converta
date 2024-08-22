@@ -3,12 +3,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import pixelsSlice from "./pixelsSlice";
 import notificationSlice from "./notificationSlice";
 import authSlice from "./authSlice";
+import apiKeysSlice from "./apiKeysSlice";
 
 const store = configureStore({
   reducer: {
     pixels: pixelsSlice.reducer,
     notification: notificationSlice.reducer,
     auth: authSlice.reducer,
+    apiKeys: apiKeysSlice.reducer,
   },
   enhancers: (getDefaultEnhancers) => getDefaultEnhancers(),
 });

@@ -117,24 +117,8 @@ public class MetaEventBase
     // [JsonPropertyName("user_data")]
     public UserData UserData {get; set;}
     public string? CustomerId {get; set;}
-
-    // CUSTOMER INFO
-    // These ones can define unique leads
-    // public string? Email { get; set; } // Hash
-    // public string? CustomerId {get; set; } // Hash (not sure) replaces email tho
-    // public string? Phone { get; set; } // Hash
-
-    // These ones can't define unique leads
-    // public string? ClientUserAgent { get; set; } // Do not Hash
-    // public string? IPAddress { get; set; } // Do not Hash
-
-    // Navigation Properties
-    // [JsonPropertyName("pixel_id")]
-    public string PixelId {get; set;} // Required Pixel foreign key property
-    // public Pixel Pixel {get; set;} = null!; // Required reference navigation to Pixel
-    // [JsonPropertyName("lead_id")]
-    public Guid LeadId {get; set;} // Required Lead foreign key property
-    // public Lead Lead {get; set;} = null!; // Required reference navigation to Lead
+    public string PixelId {get; set;}
+    public Guid LeadId {get; set;}
 
 }
 
@@ -192,5 +176,4 @@ public class MetaEventQP //Meta Event Query Params
     public bool isConverted {get; set;}
     public bool isOnline {get; set;}
     public string accessToken {get; set;}
-    public string UserId{get; set;}
 }

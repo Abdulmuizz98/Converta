@@ -14,6 +14,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Preline from "./components/Preline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getApiKey } from "./store/apiKeysSlice";
 
 function App() {
   const auth = useAppSelector((state) => state.auth);
@@ -23,6 +24,10 @@ function App() {
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
+
+  useEffect(() => {
+    isAuthenticated && dispatch(getApiKey("converta"));
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (auth.error) {
