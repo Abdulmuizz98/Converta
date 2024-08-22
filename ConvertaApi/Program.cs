@@ -4,12 +4,15 @@ using ConvertaApi.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ConvertaApi.MiddleWares;
+using FirebaseAdmin;
 
 var builder = WebApplication.CreateBuilder(args);
-// builder.Services.AddDbContext<AdContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("AdContext") ?? throw new InvalidOperationException("Connection string 'AdContext' not found.")));
 
 // Add services to the container.
+
+// Add Firebasse Admin SDK
+builder.Services.AddSingleton(FirebaseApp.Create());
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -21,16 +24,28 @@ builder.Services.AddControllers()
     });
 
 // Configure CORS policy
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowSpecificOrigins",
+//         builder =>
+//         {
+//             builder.WithOrigins("http://localhost:3000", "http://localhost:3001")
+//                 .AllowAnyMethod()
+//                 .AllowAnyHeader();
+//         });
+// });
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigins",
+    options.AddPolicy("AllowAll",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000", "http://localhost:3001")
+            builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
 });
+
 
 // Configure route options to be case-insensitive
 builder.Services.AddRouting(options => 
@@ -42,7 +57,7 @@ builder.Services.AddRouting(options =>
 // builder.Services.AddDbContext<CampaignContext>(options =>
 //     options.UseSqlServer(builder.Configuration.GetConnectionString("CampaignContext")));
 builder.Services.AddDbContext<ConvertaContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PgSqlConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PgSqlConnection") ?? throw new InvalidOperationException("Connection string PgSqlConnection not found.")));
 // builder.Services.AddDbContext<ConvertaContext>(options =>
 //     options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection")));
 // builder.Services.AddDbContext<ConvertaContext>(options =>
@@ -64,9 +79,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
-app.UseCors("AllowSpecificOrigins");
+app.UseCors("AllowAll");
+
+app.UseMiddleware<AuthMiddleware>();
 
 app.UseAuthorization();
 

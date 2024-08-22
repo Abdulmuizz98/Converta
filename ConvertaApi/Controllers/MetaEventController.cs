@@ -1,14 +1,7 @@
-using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ConvertaApi.Models;
 using ConvertaApi.Services;
-using System.Drawing;
+using FirebaseAdmin.Auth;
 
 namespace ConvertaApi.Controllers
 {
@@ -42,7 +35,7 @@ namespace ConvertaApi.Controllers
                 return NotFound();
             }
 
-            return metaEvent;
+            return Ok(metaEvent);
         }
 
         // POST: api/MetaEvent
@@ -51,12 +44,14 @@ namespace ConvertaApi.Controllers
         public async Task<ActionResult<MetaEvent>> PostMetaEvent([FromBody] MetaEventBase newMetaEvent , [FromQuery] MetaEventQP queryParams)
         {
             bool isOnline = queryParams.isOnline, isConverted = queryParams.isConverted, isRevisit = false;
-            string accessToken = queryParams.accessToken, userId = queryParams.UserId;
+            string accessToken = queryParams.accessToken;
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await UserOwnsPixel(userId, newMetaEvent.PixelId) == false)
+            UserRecord userProfile = (UserRecord) HttpContext.Items["UserProfile"]!;
+            
+            if (await UserOwnsPixel(userProfile.Uid, newMetaEvent.PixelId) == false)
                 return BadRequest("User does not own the pixel.");
 
             Lead? lead = await _convertaService.GetItem<Lead>(l => l.Id == newMetaEvent.LeadId && l.PixelId == newMetaEvent.PixelId);
@@ -168,31 +163,6 @@ namespace ConvertaApi.Controllers
                     phones[i] = MetaEventDataDTO.ComputeSha256Hash(phones[i]);
         }
 
-        // private static void HashSensitive(MetaEventDTO meDto)
-        // {
-        //     var emails = meDto.UserData.Email;
-        //     var phones = meDto.UserData.Phone;
-
-        //     if (emails is not null)
-        //     {
-        //         var hashedEmails = new List<string>();
-        //         foreach (var email in emails)
-        //         {
-        //             hashedEmails.Add(MetaEventDataDTO.ComputeSha256Hash(email));
-        //         }
-        //         meDto.UserData.Email = hashedEmails;
-        //     }
-
-        //     if (phones is not null)
-        //     {
-        //         var hashedPhones = new List<string>();
-        //         foreach (var phone in phones)
-        //         {
-        //             hashedPhones.Add(MetaEventDataDTO.ComputeSha256Hash(phone));
-        //         }
-        //         meDto.UserData.Phone = hashedPhones;
-        //     }
-        // }
         private static Lead BaseToLead(MetaEventBase metaEvent) => new()
         {
             Id = metaEvent.LeadId,

@@ -36,7 +36,8 @@ const Pixel = () => {
   console.log(useParams());
   console.log(pixelId);
   const dispatch = useAppDispatch();
-  const token = useAppSelector((state) => state.auth.user!.token);
+  const user = useAppSelector((state) => state.auth.user!);
+  const token = user.token;
   const [events, setEvents] = useState<Event[]>([]);
   const pixels = useAppSelector((state) => state.pixels.pixels);
   const pixel = pixels.find((p) => p.id === pixelId) || {
@@ -47,6 +48,7 @@ const Pixel = () => {
     description: "Unknown",
     access_token: "Unknown",
   };
+  const SERVICE_URI = import.meta.env.VITE_SERVICE_URI;
 
   // interface Pixel {
   //   id: string;
@@ -63,14 +65,13 @@ const Pixel = () => {
 
   useEffect(() => {
     async function fetchEvents() {
-      const endpoint = "http://localhost:3000/converta/api";
-      const url = `${endpoint}/pixel/${pixelId}/metaEvents`;
+      const url = `${SERVICE_URI}/api/pixel/${pixelId}/metaEvents`;
 
       try {
         const res = await fetch(url, getConfig(token));
         const data = await res.json();
         setEvents(data);
-      } catch (err) {
+      } catch (err: any) {
         if (err.response.status === 403) {
           dispatch(logout());
         }

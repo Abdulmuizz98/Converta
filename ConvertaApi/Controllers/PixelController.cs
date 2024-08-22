@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FirebaseAdmin.Auth;
 
 using ConvertaApi.Models;
 using ConvertaApi.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ConvertaApi.Controllers
 {
@@ -25,34 +27,18 @@ namespace ConvertaApi.Controllers
 
         // GET: api/Pixel
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pixel>>> GetPixels()
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<Pixel>>> GetAllPixels()
         {
             return await _convertaService.GetItems<Pixel>();
         }
         
-        // GET: api/Pixel/userId
-        [HttpGet("pixelId")]
-        public async Task<ActionResult<IEnumerable<MetaEvent>>> GetPixelsByUserId([FromQuery] string pixelId)
+        // GET: api/Pixel/user/userId
+        [HttpGet("mine")]
+        public async Task<ActionResult<IEnumerable<Pixel>>> GetUserPixels()
         {
-            if (string.IsNullOrWhiteSpace(pixelId))
-            {
-                return BadRequest("PixelId parameter is required");
-            }
-
-            return await _convertaService.GetItems<MetaEvent>(me => me.PixelId == pixelId);
-        }
-
- 
-        // GET api/pixel/{pixelId}/metaEvents
-        [HttpGet("{pixelId}/metaEvents")]
-        public async Task<ActionResult<IEnumerable<MetaEvent>>> GetMetaEventByPixelId(string pixelId)
-        {
-            if (await PixelExists(pixelId) == false)
-            {
-                return NotFound("Pixel not found");
-            }
-
-            return await _convertaService.GetItems<MetaEvent>(me => me.PixelId == pixelId);
+            UserRecord userProfile = (UserRecord) HttpContext.Items["UserProfile"]!;
+            return await _convertaService.GetItems<Pixel>(me => me.UserId == userProfile.Uid);
         }
 
         // GET: api/Pixel/5
@@ -66,22 +52,36 @@ namespace ConvertaApi.Controllers
                 return NotFound();
             }
 
-            return px;
+            return Ok(px);
         }
+ 
+        // GET api/pixel/{pixelId}/metaEvents
+        [HttpGet("{pixelId}/metaEvents")]
+        public async Task<ActionResult<IEnumerable<MetaEvent>>> GetMetaEventByPixelId(string pixelId)
+        {
+            if (await PixelExists(pixelId) == false)
+            {
+                return NotFound("Pixel not found");
+            }
+
+            return await _convertaService.GetItems<MetaEvent>(me => me.PixelId == pixelId);
+        }
+
 
         // POST: api/Pixel
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Pixel>> PostPixel(Pixel newPixel)
+        public async Task<ActionResult<Pixel>> PostPixel(PixelBase newPixel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Pixel px = BaseToPixel(newPixel);
-
-            await _convertaService.AddItem<Pixel>(newPixel);
-
-            return CreatedAtAction(nameof(GetPixel), new { id = newPixel.Id }, newPixel);
+            UserRecord userProfile = (UserRecord) HttpContext.Items["UserProfile"]!;
+            Pixel px = BaseToPixel(newPixel, userProfile.Uid);
+            
+            await _convertaService.AddItem<Pixel>(px);
+            
+            return CreatedAtAction(nameof(PostPixel), new { id = newPixel.Id }, newPixel);
         }
 
         // DELETE: api/Pixel/5
@@ -100,6 +100,17 @@ namespace ConvertaApi.Controllers
             return NoContent();
         }
 
+        private static Pixel BaseToPixel(PixelBase px, string uId)
+        {
+            return new() {
+                Id = px.Id,
+                Name = px.Name,
+                Description = px.Description,
+                AccessToken = px.AccessToken,
+                PixelType = px.PixelType,
+                UserId = uId
+            };
+        }
         private async Task<bool> PixelExists(string id)
         {
             return await _convertaService.ItemExists<Pixel>(px => px.Id == id);

@@ -1,44 +1,41 @@
 version: "3.8"
 services:
-  db:
+  postgresdb:
     image: postgres:16.2
-    container_name: postgresdb
     ports:
-      - 5432:5432
+      - 5431:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - converta-network
     env_file:
       - "$PWD/ConvertaApi/.postgres.env"
 
   converta-api:
-    build:
-      context: ./ConvertaApi
-      dockerfile: Dockerfile
-    container_name: api
+    image: oraio/converta-api:latest
     ports:
       - 8080:8080
+    networks:
+      - converta-network
     env_file:
       - "$PWD/ConvertaApi/.env"
-    deploy:
-      replicas: 2
-    depends_on:
-      - db
 
   api-gateway:
-    build:
-      context: ./ApiGateway
-      dockerfile: Dockerfile
-      target: production
-    container_name: api-gateway
+    image: oraio/converta-api-gateway:latest
     ports:
-      - 3000:3000
+      - 80:3000
+    networks:
+      - converta-network
     volumes:
       - ./ApiGateway:/usr/src/app
       - /usr/src/app/node_modules
     env_file:
       - "$PWD/ApiGateway/.env"
-    depends_on:
-      - converta-api
 
 volumes:
   postgres-data:
+
+networks:
+  converta-network:
+    name: converta-network
+    external: true

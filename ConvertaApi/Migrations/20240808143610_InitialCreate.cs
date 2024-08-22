@@ -13,36 +13,19 @@ namespace ConvertaApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "User",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_User", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Pixel",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     AccessToken = table.Column<string>(type: "text", nullable: false),
-                    PixelType = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false)
+                    PixelType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pixel", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Pixel_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -154,11 +137,6 @@ namespace ConvertaApi.Migrations
                 name: "IX_MetaEvent_PixelId",
                 table: "MetaEvent",
                 column: "PixelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Pixel_UserId",
-                table: "Pixel",
-                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -178,9 +156,6 @@ namespace ConvertaApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Pixel");
-
-            migrationBuilder.DropTable(
-                name: "User");
         }
     }
 }

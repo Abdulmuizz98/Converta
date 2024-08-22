@@ -22,12 +22,5 @@ public class Lead
 
 
     // Navigation Properties
-    // [JsonPropertyName("pixel_id")]
     public string PixelId {get; set;} // Required Pixel foreign key property
-    // public Pixel Pixel {get; set;} = null!; // Required reference navigation to Pixel
-
-    // public ICollection<MetaEvent> MetaEvents {get;} = []; // Collection navigation for MetaEvent
-
-
-
 }

@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
-// using Newtonsoft.Json.Serialization;
 
 namespace ConvertaApi.Models;
 
@@ -12,7 +10,7 @@ public enum PixelType{
 }
 
 
-public class Pixel
+public class PixelBase
 {
     [JsonPropertyName("id")]
     public string Id { get; set; }
@@ -21,18 +19,12 @@ public class Pixel
     public string? Description {get; set;}
     public string AccessToken {get; set;}
 
-    // [JsonPropertyName("pixel_type")]
     [EnumDataType(typeof(PixelType))]
     public string PixelType { get; set; }
+}
 
-
-    // Navigation Properties
-
-    // [JsonPropertyName("user_id")]
-    public string UserId { get; set; } // Required User foreign key property
-    // public User User { get; set; } = null!; // Required reference navigation to User
-
-    // public ICollection<Lead> Leads {get;} = []; // Collection navigation for Lead
-    // public ICollection<MetaEvent> MetaEvents {get;} = []; // Collection navigation for MetaEvent
+public class Pixel: PixelBase
+{
+    public string UserId { get; set; }
 
 }

@@ -5,12 +5,6 @@ namespace ConvertaApi.Data
 {
     public class ConvertaContext(DbContextOptions<ConvertaContext> options) : DbContext(options)
     {
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        // {
-        //     optionsBuilder.UseSqlServer("YourConnectionStringHere");
-        // }
-
-        public DbSet<User> User { get; set; } = default!;
         public DbSet<Pixel> Pixel { get; set; } = default!;
         public DbSet<Lead> Lead { get; set; } = default!;
         public DbSet<MetaEvent> MetaEvent { get; set; } = default!;
@@ -20,14 +14,6 @@ namespace ConvertaApi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User to Pixel relationship (one-to-many)
-            modelBuilder.Entity<User>()
-                .HasMany<Pixel>()
-                .WithOne()
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
-
             // Pixel to Lead relationship (one-to-many)
             modelBuilder.Entity<Pixel>()
                 .HasMany<Lead>()
@@ -74,6 +60,5 @@ namespace ConvertaApi.Data
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
         }
-
     }
 }

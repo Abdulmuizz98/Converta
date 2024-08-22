@@ -152,19 +152,7 @@ namespace ConvertaApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Pixel");
-                });
-
-            modelBuilder.Entity("ConvertaApi.Models.User", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("ConvertaApi.Models.UserData", b =>
@@ -221,15 +209,6 @@ namespace ConvertaApi.Migrations
                     b.HasOne("ConvertaApi.Models.Pixel", null)
                         .WithMany()
                         .HasForeignKey("PixelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ConvertaApi.Models.Pixel", b =>
-                {
-                    b.HasOne("ConvertaApi.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
