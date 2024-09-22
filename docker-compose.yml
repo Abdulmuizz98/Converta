@@ -20,18 +20,6 @@ services:
     env_file:
       - "$PWD/ConvertaApi/.env"
 
-  api-gateway:
-    image: oraio/converta-api-gateway:latest
-    ports:
-      - 80:3000
-    networks:
-      - converta-network
-    volumes:
-      - ./ApiGateway:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - "$PWD/ApiGateway/.env"
-
 volumes:
   postgres-data:
 

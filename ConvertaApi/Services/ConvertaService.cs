@@ -108,15 +108,6 @@ public class ConvertaService
         return await dbSet.AnyAsync(predicate);
     }
 
-    // public async Task SendMetaEventPayload (string payload, string pixelId, string accessToken)
-    // {
-    //     // https://graph.facebook.com/{API_VERSION}/{DATASET_ID}/events?access_token={TOKEN}
-    //     var url = $"https://graph.facebook.com/{META_API_VERSION}/{pixelId}/events?access_token={accessToken}";
-    //     var content = new StringContent(payload, Encoding.UTF8, "application/json");
-    //     var response = await _httpClient.PostAsync(url, content);
-    //     response.EnsureSuccessStatusCode();
-    // }
-
     public async Task<bool> SendMetaEventPayloadWithRetry (string payload, string pixelId, string accessToken, int retries)
     {
         // https://graph.facebook.com/{API_VERSION}/{DATASET_ID}/events?access_token={TOKEN}
